@@ -6,16 +6,19 @@ namespace BehaviorAI
 {
     public interface IBehavior
     {
+        GameObject SetTarget();
         void Call(IAction set);
     }
 
     public interface IConditional
     {
+        GameObject Target { set; }
         bool Check();
     }
 
     public interface IAction
     {
+        GameObject Target { set; }
         void Execute();
         bool End();
         bool Reset { set; }
@@ -55,10 +58,11 @@ namespace BehaviorAI
 
         public void Repeater<T>(T get) where T : IBehavior
         {
+            GameObject t = get.SetTarget();
             switch (_state)
             {
                 case State.Run:
-                    _sqN.Set(_selector[_stN.GetID].Datas[_sqN.ID], get, ref _state);
+                    _sqN.Set(_selector[_stN.GetID].Datas[_sqN.ID], get, ref _state, t);
                     break;
                 case State.Set:
                     _state = State.None;
@@ -67,7 +71,7 @@ namespace BehaviorAI
                     _stN = new SelectorNode();
                     _sqN = new SequenceNode();
                     _state = State.Set;
-                    _stN.Set(_selector, _sqN, ref _state);
+                    _stN.Set(_selector, _sqN, ref _state, t);
                     break;
             }     
         }
@@ -77,10 +81,10 @@ namespace BehaviorAI
             public int GetID { get => _id; }
             int _id = 0;
 
-            public void Set(List<Selector> st, SequenceNode sq, ref State state)
+            public void Set(List<Selector> st, SequenceNode sq, ref State state, GameObject t)
             {
                 ConditionalNode cN = new ConditionalNode();
-
+                cN.SetTarget = t;
                 if (st.Count <= 0)
                 {
                     Debug.LogError("データがありません");
@@ -103,11 +107,14 @@ namespace BehaviorAI
 
         class ConditionalNode
         {
+            public GameObject SetTarget { private get; set; }
+
             public void Set(Selector st, SequenceNode sq, ref State state)
             {
                 for (int id = 0; id < st.Datas.Count; id++)
                 {
                     IConditional c = st.Datas[id].Conditional;
+                    c.Target = SetTarget;
                     if (c.Check())
                     {
                         state = State.Run;
@@ -124,23 +131,25 @@ namespace BehaviorAI
         {
             public int ID { get; set; } = 0;
 
-            public void Set(Selector.Seqence sq, IBehavior b, ref State state)
+            public void Set(Selector.Seqence sq, IBehavior b, ref State s, GameObject t)
             {
                 ActionNode aN = new ActionNode();
-
-                if (sq.Conditional.Check()) aN.Set(sq.Action, b, ref state);
+                aN.SetTarget = t;
+                if (sq.Conditional.Check()) aN.Set(sq.Action, b, ref s);
                 else
                 {
                     sq.Action.Reset = false;
-                    state = State.None;
+                    s = State.None;
                 }
             }
         }
 
         class ActionNode
         { 
+            public GameObject SetTarget { get; set; }
             public void Set(IAction a, IBehavior iB, ref State state)
             {
+                a.Target = SetTarget;
                 if (a.End())
                 {
                     state = State.None;

@@ -12,6 +12,7 @@ public class ActionB : IAction
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
+            Debug.Log(Target);
             Debug.Log("ActionB");
             _isEnd = true;
         }
@@ -24,4 +25,5 @@ public class ActionB : IAction
     }
 
     public bool Reset { set { _isEnd = value; } }
+    public GameObject Target { private get; set; }
 }

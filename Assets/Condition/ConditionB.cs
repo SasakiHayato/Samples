@@ -7,6 +7,7 @@ using BehaviorAI;
 public class ConditionB : IConditional
 {
     bool _check = false;
+    public GameObject Target { private get; set; }
 
     public bool Check()
     {

@@ -9,5 +9,6 @@ public class TreeUser : MonoBehaviour, IBehavior
     [SerializeField] BehaviorTree _tree;
 
     void Update() => _tree.Repeater(this);
+    public GameObject SetTarget() => gameObject;
     public void Call(IAction a) => a.Execute();
 }
