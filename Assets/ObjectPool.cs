@@ -1,28 +1,62 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
-namespace Pool
+public class ObjectPool<T> where T : Object
 {
-    public interface IPool
+    List<GameObject> _targetList = new List<GameObject>();
+    List<GameObject> _deleteList = new List<GameObject>();
+
+    int _count;
+    GameObject _setTarget;
+    
+    public void Create(GameObject set)
     {
-        void Create();
-        void Use();
-        void Delete();
+        _setTarget = set;
+        for (int i = 0; i < 10; i++)
+        {
+            _count++;
+            GameObject obj = Object.Instantiate(set);
+            obj.name = $"Pool {_count}";
+            _targetList.Add(obj);
+            obj.SetActive(false);
+        }
     }
 
-    public class ObjectPool<T> : MonoBehaviour where T : IPool
+    public GameObject Use()
     {
-        T GetT;
-
-        private void Awake()
+        bool check = false;
+        GameObject target = default;
+        foreach (GameObject obj in _targetList)
         {
-            GetT.Create();
+            bool active = obj.activeSelf;
+            if (!active)
+            {
+                check = true;
+                obj.SetActive(true);
+                target = obj;
+                break;
+            }
+        }
+        if (!check)
+        {
+            GameObject obj = Object.Instantiate(_setTarget);
+            _count++;
+            obj.name = $"Pool {_count}";
+            _targetList.Add(obj);
+            target = obj;
         }
 
-        public void Use()
-        {
-            GetT.Use();
-        }
+        _deleteList.Add(target);
+        return target;
+    }
+
+    public void Delete()
+    {
+        if (_deleteList.Count <= 0) return;
+
+        _deleteList.First().SetActive(false);
+        _deleteList.Remove(_deleteList.First());
     }
 }
