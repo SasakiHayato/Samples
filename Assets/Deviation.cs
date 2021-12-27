@@ -2,20 +2,37 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Deviation
+public struct Deviation 
 {
-    public Vector3 GetDir { get; private set; } = Vector3.zero;
-
-    public void Predict(Transform shooter, Transform currentTarget, Vector3 beforePos)
+    public Vector3 DeviationDir(Vector3 tPos, Vector3 myPos, Vector3 tBeforePos, float speed)
     {
-        Vector3 myPos = shooter.position;
-        Vector3 tPos = currentTarget.position;
-        Vector3 prePos = tPos + beforePos;
+        float distance = Vector3.Distance(myPos, tPos);
+        // Bulletの到達時間
+        float t = distance / speed;
 
-        Vector3 cForward = (tPos - myPos).normalized;
-        Vector3 pForward = (prePos - tPos).normalized;
-        float rad = Vector3.Dot(cForward, pForward);
+        Vector3 tDir = (tPos - tBeforePos).normalized;
 
-        GetDir = pForward;
+        float tSpeed = Vector3.Distance(tPos, tBeforePos) * 60;
+
+        Vector3 predictPos = (tDir * tSpeed) * t;
+        Vector3 afterPos = predictPos - myPos;
+
+        return (afterPos + tPos).normalized;
+    }
+
+    public Vector3 DeviationPos(Vector3 tPos, Vector3 myPos, Vector3 tBeforePos, float speed)
+    {
+        float distance = Vector3.Distance(myPos, tPos);
+        // Bulletの到達時間
+        float t = distance / speed;
+
+        Vector3 tDir = (tPos - tBeforePos).normalized;
+
+        float tSpeed = Vector3.Distance(tPos, tBeforePos) * 60;
+
+        Vector3 predictPos = (tDir * tSpeed) * t;
+        Vector3 afterPos = predictPos - myPos;
+
+        return afterPos + tPos;
     }
 }

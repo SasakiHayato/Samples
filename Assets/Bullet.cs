@@ -6,7 +6,7 @@ public class Bullet : MonoBehaviour
 {
     [SerializeField] GameObject _bullet;
 
-    public void Shot(Vector3 dir, Transform parent, float speed = 10)
+    public void Shot(Vector3 dir, Transform parent, float speed = 1)
     {
         GameObject obj = Instantiate(_bullet);
         obj.transform.position = parent.position;
